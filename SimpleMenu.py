@@ -8,7 +8,8 @@ import curses
 
 
 class Menu(object):
-    def __init__(self, *names, **kwargs):
+    def __init__(self, *names, title=None):
+        self.title = title
         # Setup a window object etc., misc Curses stuff.
         self.stdscr = curses.initscr()
         curses.start_color()
@@ -27,9 +28,15 @@ class Menu(object):
         # Setup background
         self.stdscr.bkgd(' ', curses.color_pair(1))
 
-        # Screw this global malarkey
+        # Y position makes the menu centered vertically
         global y_pos
         y_pos = (self.stdscr.getmaxyx()[0] - len(names)) // 2
+
+        # Get y position for title
+        if self.title is not None:
+            # 2 lines above menu items
+            self.y_pos_title = y_pos - 2
+            self.x_pos_title = (self.stdscr.getmaxyx()[1] - len(self.title)) // 2
 
         # Create list of menu items
         self.menu_items = []
@@ -49,12 +56,14 @@ class Menu(object):
 
     def draw(self):
         # Draw out each item on menu, with highlighting.
+        if self.title:
+            self.stdscr.addstr(self.y_pos_title, self.x_pos_title, self.title, curses.A_BOLD)
         for item in self.menu_items:
             self.stdscr.addstr(item.y_pos, item.x_pos, item.name, item.attr)
         self.stdscr.refresh()
 
 
-    def start(self):
+    def show(self):
         try:
             # Initially select first item on the menu.
             selected_item = 0
