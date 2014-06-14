@@ -1,0 +1,8 @@
+language: python
+python:
+  - "3.3"
+  - "3.4"
+
+install:
+  - "python3 setup.py install"
+
