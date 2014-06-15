@@ -2,10 +2,10 @@
 from SimpleMenu import Menu
 
 new_menu = Menu("Choice A",
-				"Choice B",
-				"Choice C",
-				title="Title",
-				subtitle="Subtitle (Press Q to quit)")
+                "Choice B",
+                "Choice C",
+                title="Title",
+                subtitle="Subtitle (Press Q to quit)")
 
 choice = new_menu.show()
 
