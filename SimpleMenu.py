@@ -8,6 +8,8 @@ import curses
 import os
 
 class Menu(object):
+	"""Main object to represent the menu screen. `show` method shows the menu
+	and returns the user's choice."""
     def __init__(self, *names, title=None, subtitle=None):
         self.title = title
         self.subtitle = subtitle
@@ -39,9 +41,10 @@ class Menu(object):
             # 3 lines above menu items
             if len(self.title) > width:
                 self.title = self.title[:width - 3] + "..."
-            pad = 2 if self.subtitle is None else 3
+            pad = 3 if self.subtitle else 2
             self.y_pos_title = y_pos - pad
-            self.x_pos_title = (self.stdscr.getmaxyx()[1] - len(self.title)) // 2
+            screen_width = self.stdscr.getmaxyx()[1]
+            self.x_pos_title = (screen_width - len(self.title)) // 2
 
         if self.subtitle is not None:
             if len(self.subtitle) > width:
@@ -58,7 +61,7 @@ class Menu(object):
 
 
     def clear_display(self):
-        # Restore terminal state to normal.
+    	"""Clear the screen and restore terminal state to normal."""
         curses.nocbreak()
         curses.echo()
         curses.curs_set(1)
@@ -68,7 +71,7 @@ class Menu(object):
 
 
     def draw(self):
-        # Draw out each item on menu, with highlighting.
+        """Draw out each item on menu, with highlighting."""
         if self.title:
             self.stdscr.addstr(self.y_pos_title,
                                self.x_pos_title,
@@ -87,26 +90,25 @@ class Menu(object):
 
 
     def show(self):
+    	"""Display the menu, and return the user's choice (or None)."""
         try:
             # Initially select first item on the menu.
             selected_item = 0
-            self.menu_items[0]._select()
+            self.menu_items[selected_item]._select()
             # Draw out the menu.
             self.draw()
             while True:
                 # Get the user's input.
                 user_key = self.stdscr.getkey()
-                #self.stdscr.addstr(10, 10, user_key)
-                #self.stdscr.addstr(11, 10, str(type(user_key)))
                 if user_key == "KEY_UP" and selected_item > 0:
-                    # Go up one menu item.
+                    # Go up one menu item if not already at the top.
                     self.menu_items[selected_item]._deselect()
                     selected_item -= 1
                     self.menu_items[selected_item]._select()
                     self.draw()
                 elif (user_key == "KEY_DOWN"
                       and selected_item < len(self.menu_items) - 1):
-                    # Go down one menu item.
+                    # Go down one menu item if not already at the bottom.
                     self.menu_items[selected_item]._deselect()
                     selected_item += 1
                     self.menu_items[selected_item]._select()
@@ -120,21 +122,21 @@ class Menu(object):
                     # quit()
                     return None  # Handle this in program.
         except KeyboardInterrupt:
-            # Don't throw an error, clear_display() handles restoring terminal state.
+            # Don't throw an error, clear_display() restores terminal state.
             pass
 
         self.clear_display()
 
 
 class MenuItem(object):
-
+	"""Base object for each menu item. Allows selection and text editing."""
     def __init__(self, name, stdscr):
         self.name = name
         global y_pos
         self.y_pos = y_pos
         y_pos += 1  # Put each item on a new line.
         maxyx = stdscr.getmaxyx()
-        # Horizontally center each line.
+        # Horizontally center-justify each line.
         self.x_pos = (maxyx[1] - len(self.name)) // 2
         self.attr = curses.A_NORMAL
     def _select(self):
