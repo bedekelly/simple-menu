@@ -7,10 +7,15 @@ Provides an easy-to-use interface for creating menus with the Curses library.
 import curses
 import os
 
+def term_width():
+    import os
+    rows, columns = os.popen('stty size', 'r').read().split()
+    return int(columns)
+
 class Menu(object):
-	"""Main object to represent the menu screen. `show` method shows the menu
-	and returns the user's choice."""
-    def __init__(self, *names, title=None, subtitle=None):
+    """Main object to represent the menu screen. `show` method shows the menu
+        and returns the user's choice."""
+    def __init__(self, names, title=None, subtitle=None):
         self.title = title
         self.subtitle = subtitle
         # Setup a window object etc., misc Curses stuff.
@@ -23,7 +28,7 @@ class Menu(object):
         self.stdscr.keypad(True)
         self.stdscr.clear()
         self.stdscr.border(0)
-        width = os.get_terminal_size().columns
+        width = term_width()
         width -= 2  # Compensate for border
 
         # Setup color pairs
@@ -61,7 +66,7 @@ class Menu(object):
 
 
     def clear_display(self):
-    	"""Clear the screen and restore terminal state to normal."""
+        """Clear the screen and restore terminal state to normal."""
         curses.nocbreak()
         curses.echo()
         curses.curs_set(1)
@@ -90,7 +95,7 @@ class Menu(object):
 
 
     def show(self):
-    	"""Display the menu, and return the user's choice (or None)."""
+        """Display the menu, and return the user's choice (or None)."""
         try:
             # Initially select first item on the menu.
             selected_item = 0
@@ -129,7 +134,7 @@ class Menu(object):
 
 
 class MenuItem(object):
-	"""Base object for each menu item. Allows selection and text editing."""
+    """Base object for each menu item. Allows selection and text editing."""
     def __init__(self, name, stdscr):
         self.name = name
         global y_pos
